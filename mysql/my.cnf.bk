@@ -1,0 +1,109 @@
+#
+# The MySQL database server configuration file.
+#
+# You can copy this to one of:
+# - "/etc/mysql/my.cnf" to set global options,
+# - "~/.my.cnf" to set user-specific options.
+# 
+# One can use all long options that the program supports.
+# Run program with --help to get a list of available options and with
+# --print-defaults to see which it would actually understand and use.
+#
+# For explanations see
+# http://dev.mysql.com/doc/mysql/en/server-system-variables.html
+
+#
+# * IMPORTANT: Additional settings that can override those from this file!
+#   The files must end with '.cnf', otherwise they'll be ignored.
+#
+#[mysqld]
+#innodb_log_file_size = 512M
+#innodb_strict_mode = 0
+#sql_mode = STRICT_TRANS_TABLES
+
+#!includedir /etc/mysql/conf.d/
+#!includedir /etc/mysql/mysql.conf.d/
+
+[mysqld]
+#skip-grant-tables
+#skip-networking
+#disable-log-bin = 1
+innodb_log_file_size = 256M
+innodb_strict_mode = 0
+skip-name-resolve = 1
+performance-schema = 0
+local-infile = 0
+mysqlx = 0
+bind-address = 0.0.0.0
+open_files_limit = 200000
+max_allowed_packet = 256M
+sql_mode = "STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"
+
+innodb_dedicated_server = 1
+innodb_buffer_pool_instances = 48
+innodb_log_buffer_size = 64M
+innodb_read_io_threads = 12
+innodb_write_io_threads = 12
+innodb_stats_on_metadata = 0
+innodb_file_per_table = 1
+#innodb_page_size = 65536
+
+max_connections = 500
+thread_cache_size = 128
+table_definition_cache = 65536
+table_open_cache = 65536
+
+wait_timeout = 28800
+connect_timeout = 10
+interactive_timeout = 28800
+
+tmp_table_size = 128M
+max_heap_table_size = 128M
+
+read_buffer_size = 256K
+join_buffer_size = 512K
+sort_buffer_size = 512K
+read_rnd_buffer_size = 512K
+
+slow-query-log = 1
+long_query_time = 2
+slow_query_log_file = /var/log/mysql/slow_query.log
+log-error = /var/log/mysql/err.log
+
+
+# For advice on how to change settings please see
+# http://dev.mysql.com/doc/refman/8.2/en/server-configuration-defaults.html
+
+[mysqld]
+#
+# Remove leading # and set to the amount of RAM for the most important data
+# cache in MySQL. Start at 70% of total RAM for dedicated server, else 10%.
+# innodb_buffer_pool_size = 128M
+#
+# Remove leading # to turn on a very important data integrity option: logging
+# changes to the binary log between backups.
+# log_bin
+#
+# Remove leading # to set options mainly useful for reporting servers.
+# The server defaults are faster for transactions and fast SELECTs.
+# Adjust sizes as needed, experiment to find the optimal values.
+# join_buffer_size = 128M
+# sort_buffer_size = 2M
+# read_rnd_buffer_size = 2M
+
+# Remove leading # to revert to previous value for default_authentication_plugin,
+# this will increase compatibility with older clients. For background, see:
+# https://dev.mysql.com/doc/refman/8.2/en/server-system-variables.html#sysvar_default_authentication_plugin
+# default-authentication-plugin=mysql_native_password
+skip-host-cache
+skip-name-resolve
+datadir=/var/lib/mysql
+socket=/var/run/mysqld/mysqld.sock
+secure-file-priv=/var/lib/mysql-files
+user=mysql
+
+pid-file=/var/run/mysqld/mysqld.pid
+[client]
+socket=/var/run/mysqld/mysqld.sock
+
+!includedir /etc/mysql/conf.d/

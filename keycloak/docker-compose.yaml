@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  keycloak:
+    image: keycloak/keycloak:22.0
+    container_name: keycloak
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: timeout 10s bash -c ':> /dev/tcp/127.0.0.1/8080' || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.keycloak.rule=Host(`${KEYCLOAK_HOSTNAME}`)"
+      - "traefik.http.routers.keycloak.service=keycloak"
+      - "traefik.http.routers.keycloak.entrypoints=websecure"
+      - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
+      - "traefik.http.routers.keycloak.tls=true"
+      - "traefik.http.routers.keycloak.tls.certresolver=letsencrypt"
+      - "traefik.http.services.keycloak.loadbalancer.passhostheader=true"
+      - "traefik.http.routers.keycloak.middlewares=compresstraefik"
+      - "traefik.http.middlewares.compresstraefik.compress=true"
+      - "traefik.docker.network=traefik-network"
+    restart: unless-stopped
+    env_file:
+      - .env
+    command: "start-dev --features=preview"
+    volumes:
+      - ./data:/opt/keycloak/data/
+      - ./keycloak.conf:/opt/keycloak/conf/keycloak.conf
+    networks:
+      - "network1"
+    
+
+networks:
+  network1:
+    name: docker_network
+    external: true

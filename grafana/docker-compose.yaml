@@ -1,0 +1,19 @@
+version: '3.9'
+
+services:
+  grafana:
+    image: grafana/grafana:8.3.0
+    container_name: grafana
+    ports:  
+      - "3000:3000"
+    restart: on-failure
+    volumes:
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
+      - ./data:/var/lib/grafana/  
+    networks:
+      - network1
+
+networks:
+  network1:
+    name: docker_network
+    external: true

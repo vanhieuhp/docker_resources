@@ -1,0 +1,49 @@
+version: '3.9'
+
+services:
+  node-exporter:
+    image: prom/node-exporter:master
+    container_name: node_exporter
+    ports: 
+      - "9100:9100"
+    restart: on-failure
+    networks:
+      - network1
+
+  # node-exporter2:
+  #   image: prom/node-exporter:master
+  #   container_name: node_exporter2
+  #   ports: 
+  #     - "9102:9100"
+  #   restart: on-failure
+  #   networks:
+  #     - network1
+
+  # node-exporter3:
+  #   image: prom/node-exporter:master
+  #   container_name: node_exporter3
+  #   ports: 
+  #     - "9103:9100"
+  #   restart: on-failure
+  #   networks:
+  #     - network1
+
+  prometheus:
+    image: prom/prometheus:main
+    depends_on: 
+      - node-exporter
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus.rules.yml:/etc/prometheus/prometheus.rules.yml
+      - ./data:/prometheus
+    restart: on-failure
+    networks:
+      - network1
+
+networks:
+  network1:
+    name: docker_network
+    external: true

@@ -1,0 +1,21 @@
+{
+    "name": "transactions-es-sink",
+    "config": {
+        "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
+        "tasks.max": "1",
+        "topics": "cdc.inventory.transactions",
+        "connection.url": "http://es:9200",
+        "schema.ignore": "true",
+        "type.name": "movie",
+        "flush.synchronously": "true",
+        "key.ignore": "false",
+        "behavior.on.null.values": "delete",
+        
+        "transforms": "unwrap,key",
+        "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+        "transforms.key.type": "org.apache.kafka.connect.transforms.ExtractField$Key",
+        "transforms.key.field": "transaction_id",
+        "transforms.unwrap.drop.tombstones": "false",
+        "transforms.unwrap.drop.deletes": "false"
+    }
+}

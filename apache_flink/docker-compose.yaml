@@ -1,0 +1,49 @@
+version: "3.8"
+services:
+  jobmanager:
+    image: ${FLINK_DOCKER_IMAGE_NAME:-flink}
+    container_name: jobmanager
+    expose:
+      - "6123"
+    ports:
+      - "8081:8081"
+    command: jobmanager
+    environment:
+      # - JOB_MANAGER_RPC_ADDRESS=jobmanager
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+        web.upload.dir: /opt/flink/flink-web
+        web.submit.enable: true
+    volumes:
+      # - ./data/flink-web:/opt/flink/flink-web
+      - ./data/usrlib:/opt/flink/usrlib
+    networks:
+      - network1
+
+  taskmanager:
+    image: ${FLINK_DOCKER_IMAGE_NAME:-flink}
+    # container_name: taskmanager
+    expose:
+      - "6121"
+      - "6122"
+    depends_on:
+      - jobmanager
+    scale: 1
+    command: taskmanager
+    links:
+      - "jobmanager:jobmanager"
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+        taskmanager.numberOfTaskSlots: 5
+    volumes:
+      - ./data/usrlib:/opt/flink/usrlib
+    networks:
+      - network1
+
+networks:
+  network1:
+    name: docker_network
+    external: true

@@ -1,0 +1,58 @@
+version: '3.9'
+
+
+services:
+  kong:
+    image:  kong:3.5.0
+    user: "${KONG_USER:-kong}"
+    environment:
+      KONG_ADMIN_ACCESS_LOG: "/dev/stdout"
+      KONG_ADMIN_ERROR_LOG: "/dev/stderr"
+      KONG_DATABASE: "postgres"
+      KONG_PG_HOST: "postgres"
+      KONG_PG_USER: "postgresadmin"
+      KONG_PG_PASSWORD: "password"
+      KONG_PROXY_ACCESS_LOG: "/dev/stdout"
+      KONG_ADMIN_ACCESS_LOG: "/dev/stdout"
+      KONG_PROXY_ERROR_LOG: "/dev/stderr"
+      KONG_ADMIN_ERROR_LOG: "/dev/stderr"
+      KONG_ADMIN_LISTEN: "0.0.0.0:8001, 0.0.0.0:8444 ssl"
+      KONG_ADMIN_GUI_URL: "http://localhost:8002"
+    secrets:
+      - kong_postgres_password
+    networks:
+      - docker_network
+    ports:
+      # The following two environment variables default to an insecure value (0.0.0.0)
+      # according to the CIS Security test.
+      - "8000:8000"
+      - "8443:8443"
+      # Making them mandatory but undefined, like so would be backwards-breaking:
+      # - "${KONG_INBOUND_PROXY_LISTEN?Missing inbound proxy host}:8000:8000/tcp"
+      # - "${KONG_INBOUND_SSL_PROXY_LISTEN?Missing inbound proxy ssl host}:8443:8443/tcp"
+      # Alternative is deactivating check 5.13 in the security bench, if we consider Kong's own config to be enough security here
+      - "127.0.0.1:8001:8001/tcp"
+      - "127.0.0.1:8444:8444/tcp"
+      - "127.0.0.1:8002:8002/tcp"
+    healthcheck:
+      test: [ "CMD", "kong", "health" ]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    restart: on-failure:5
+    read_only: true
+    volumes:
+      - ./data:${KONG_PREFIX:-/var/run/kong}
+      - kong_tmp_vol:/tmp
+      - ./config:/opt/kong
+    security_opt:
+      - no-new-privileges
+
+secrets:
+  kong_postgres_password:
+    file: ./POSTGRES_PASSWORD
+
+networks:
+  network1:
+    name: docker_network
+    external: true

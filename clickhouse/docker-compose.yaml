@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  clickhouse-server:
+    image: clickhouse/clickhouse-server:latest
+    container_name: some-clickhouse-server
+    ports:
+      - "8123:8123" # HTTP interface
+      - "9000:9000" # Native client interface
+      - "9009:9009" # Inter-server communication
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+      - clickhouse_logs:/var/log/clickhouse
+    environment:
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_DB: default
+      CLICKHOUSE_PASSWORD: "" # Empty password for default user
+
+  clickhouse-client:
+    image: clickhouse/clickhouse-server:latest
+    container_name: clickhouse-client
+    entrypoint: /bin/sh
+    command: -c "sleep infinity" # Keeps the container running for interactive use
+    depends_on:
+      - clickhouse-server
+    links:
+      - clickhouse-server
+
+volumes:
+  clickhouse_data:
+  clickhouse_logs:

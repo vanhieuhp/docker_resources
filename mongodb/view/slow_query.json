@@ -1,0 +1,36 @@
+{
+    "responseData": {
+        "id": "66fa306a91bfad27a5d3124f",
+        "totalComment": 0,
+        "totalUserComment": 0,
+        "contentType": "Fanroom-Poll",
+        "enableComment": true,
+        "totalMeetupUsers": 3,
+        "totalMedia": 0,
+        "collection": "fanroom_poll",
+        "options": [
+            {
+                "id": "66fa306a91bfad27a5d3124d",
+                "text": "A",
+                "position": 0,
+                "totalVotes": 4,
+                "votePercent": 100.0,
+                "voted": true,
+                "mostVoted": true
+            },
+            {
+                "id": "66fa306a91bfad27a5d3124e",
+                "text": "B",
+                "position": 1,
+                "totalVotes": 0,
+                "votePercent": 0.0,
+                "voted": false,
+                "mostVoted": false
+            }
+        ],
+        "totalParticipants": 4,
+        "totalVotes": 4,
+        "voted": true,
+        "expired": false
+    }
+}

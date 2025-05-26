@@ -1,0 +1,32 @@
+name: 'rabbitmq'
+
+services:
+  rabbitmq:
+    image: rabbitmq:custom
+    container_name: rabbitmq
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+      - "61613:61613"
+      - "15674:15674"
+    volumes:
+      - ./data:/var/lib/rabbitmq
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:15672"]
+      timeout: 10s
+      retries: 3
+      interval: 15s
+      start_period: 30s
+    mem_limit: 512m
+    mem_reservation: 128M
+    cpus: 0.25
+    networks:
+      - network1
+    restart: unless-stopped
+
+networks:
+  network1:
+    name: docker_network
+    external: true

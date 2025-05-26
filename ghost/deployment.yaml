@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ghost
+spec:
+  selector:
+    matchLabels:
+      app: ghost
+  template:
+    metadata:
+      labels:
+        app: ghost
+    spec:
+      containers:
+      - name: ghost
+        image: <Image>
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: <Port>
+        readinessProbe:
+          httpGet:
+            path: /ghost/api/v4/admin/site/
+            port: deployment-port
+            httpHeaders:
+            - name: X-Forwarded-Proto
+              value: https
+            - name: Host
+              value: blog.mydomain.com
+        livenessProbe:
+          httpGet:
+            path: /ghost/api/v4/admin/site/
+            port: deployment-port
+            httpHeaders:
+            - name: X-Forwarded-Proto
+              value: https
+            - name: Host
+              value: blog.mydomain.com

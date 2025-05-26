@@ -1,0 +1,18 @@
+# docker run -dit -p 8090:8090 --name springapp user-service:jlink-all-modules-temurin
+version: '3'
+services:
+  springapp:
+    image: user-service:jlink-known-modules-temurin
+    container_name: spring-app
+    ports:
+      - 8090:8090
+  ubuntu:
+    image: openjdk:17-jdk-slim
+    container_name: ubuntu
+    tty: true
+    stdin_open: true
+    ports:
+      - 8080:8080
+    volumes:
+      - ./spring-app/build/libs/:/libs
+    

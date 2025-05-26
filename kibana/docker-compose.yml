@@ -1,0 +1,52 @@
+version: '3.8'
+services:
+  es:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
+    container_name: es
+    mem_limit: 1g
+    environment: 
+      - xpack.security.enabled=false
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - ./data:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+    networks:
+      - "network1"
+    healthcheck:
+      test: ["CMD-SHELL", "curl --silent --fail http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=50s || exit 1"]
+      interval: 1s
+      timeout: 5s
+      retries: 120
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.12.0
+    container_name: kibana
+    ports:
+      - 5601:5601
+    restart: on-failure
+    depends_on:
+      - es
+    environment:
+      - ELASTICSEARCH_HOSTS=http://es:9200
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5601"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - network1
+
+networks:
+  network1:
+    name: docker_network
+    external: true
+

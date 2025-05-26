@@ -1,0 +1,13 @@
+{
+    "connector.class": "io.debezium.connector.mysql.MySqlConnector",
+    "connector.displayName": "MySQL",
+    "topic.prefix": "cdc",
+    "database.user": "root",
+    "schema.history.internal.kafka.topic": "schema.inventory",
+    "database.server.id": "184011",
+    "database.hostname": "mysql",
+    "database.password": "********",
+    "name": "jdbc-connector",
+    "connector.id": "mysql",
+    "schema.history.internal.kafka.bootstrap.servers": "broker:29092"
+  }

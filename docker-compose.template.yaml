@@ -1,0 +1,46 @@
+version: '3.8'
+name: "replace_me"
+services:
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: nginx:stable-alpine3.20-perl
+    container_name: nginx1
+    hostname: nginx1
+    ports:
+      - 81:80
+    volumes:
+      - nginx-data:/usr/share/nginx/html
+    environment:
+      - NGINX_HOST=nginx1
+      - NGINX_PORT=80
+      - NGINX_ROOT=/usr/share/nginx/html
+      - NGINX_INDEX=index.html
+      - NGINX_ERROR_PAGE=404.html
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      timeout: 10s
+      retries: 3
+      interval: 15s
+      start_period: 30s
+    networks:
+      - network1
+    mem_reservation: 128M
+    command: ["nginx-debug", "-g", "daemon off;"]
+    entrypoint: ["nginx-debug", "-g", "daemon off;"]
+    links:
+      - php
+    depends_on:
+      - php
+    restart: always
+
+networks:
+  network1:
+    name: docker_network
+    external: true
+
+volumes:
+  nginx-data:
+    name: nginx-data
+    external: true

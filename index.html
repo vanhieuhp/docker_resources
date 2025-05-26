@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Template</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+
+        p {
+            margin: 0;
+            line-height: 20px;
+        }
+
+        .email-container {
+            max-width: 760px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 40px 80px;
+            border: 1px solid #ddd;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .email-content {
+            line-height: 1.5;
+        }
+
+        .email-content a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+
+        .email-title {
+            font-weight: 700;
+            margin: 20px 0; 
+        }
+
+        .email-sign-link {
+            margin: 20px 0; 
+        }
+    </style>
+</head>
+
+<body>
+    <div class="email-container">
+        <div class="logo"> <img
+                src="https://test.cdn.one.fandelo.com/photo/6a996994-8632-4668-948d-30f5a7c872e6/9292051520194318beda2c293d683980.png"
+                alt="Fandelo One Logo"> </div>
+        <div class="email-content">
+            <p class="email-title">Dear {{agencyName}},</p>
+            <p>The contract for {{opportunityName}} with {{talentName}} has been signed by {{clientName}}. To review and
+                countersign the contract, please click on the link below and sign electronically.</p>
+            <p class="email-sign-link"><a href="{{signUrl}}">{{signUrl}}</a></p>
+        </div>
+        <div>
+            <p>Thank you,</p>
+            <p>{{agencyName}}</p>
+        </div>
+    </div>
+</body>
+
+</html>

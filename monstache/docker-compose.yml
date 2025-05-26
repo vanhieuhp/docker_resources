@@ -1,0 +1,79 @@
+version: '3'
+
+services:
+  mongodb1:
+    container_name: monstache-mongo1
+    image: 'docker.io/bitnami/mongodb:4.4-debian-10'
+    ports:
+      - 27017:27017
+    environment:
+      - MONGODB_ADVERTISED_HOSTNAME=mongodb1
+      - MONGODB_REPLICA_SET_MODE=primary
+      - MONGODB_ROOT_PASSWORD=password
+      - MONGODB_REPLICA_SET_KEY=mongoSet
+    volumes:
+      - 'mongodb_master_data:/bitnami/mongodb'
+
+  mongodb2:
+    container_name: monstache-mongo2
+    image: 'docker.io/bitnami/mongodb:4.4-debian-10'
+    depends_on:
+      - mongodb1
+    environment:
+      - MONGODB_ADVERTISED_HOSTNAME=mongodb2
+      - MONGODB_REPLICA_SET_MODE=secondary
+      - MONGODB_INITIAL_PRIMARY_HOST=mongodb1
+      - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=password
+      - MONGODB_REPLICA_SET_KEY=mongoSet
+      
+  mongodb3:
+    container_name: monstache-mongo3
+    image: 'docker.io/bitnami/mongodb:4.4-debian-10'
+    depends_on:
+      - mongodb1
+    environment:
+      - MONGODB_ADVERTISED_HOSTNAME=mongodb3
+      - MONGODB_REPLICA_SET_MODE=secondary
+      - MONGODB_INITIAL_PRIMARY_HOST=mongodb1
+      - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=password
+      - MONGODB_REPLICA_SET_KEY=mongoSet
+
+  elasticsearch:
+    container_name: monstache-es
+    image: elasticsearch:7.3.0
+    environment:
+      - xpack.security.enabled=false
+      - "discovery.type=single-node"
+      - bootstrap.memory_lock=true
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+      - esplugins:/usr/share/elasticsearch/plugins
+    networks: 
+      - es-net
+    ports:
+      - 9200:9200
+  kibana:
+    container_name: monstache-kibana
+    image: kibana:7.3.0
+    environment:
+      - ELASTICSEARCH_HOSTS=http://monstache-es:9200
+    networks:
+      - es-net
+    depends_on:
+      - elasticsearch
+    ports:
+      - 5601:5601
+
+volumes:
+  esdata:
+  esplugins:
+  mongodb_master_data:
+    driver: local
+
+networks: 
+  es-net:
+    driver: bridge

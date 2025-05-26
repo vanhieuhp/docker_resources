@@ -1,0 +1,24 @@
+name: mongodb
+services:
+  mongodb:
+    image: mongo:8.0.0-noble
+    container_name: mongodb
+    restart: unless-stopped
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
+    # entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "dbrs" ]
+    ports:
+      - "27017:27017"
+    volumes:
+      # - "./rs-init.sh:/scripts/rs-init.sh"
+      - "./data:/data/db"
+      - "./mongod.conf:/etc/mongod.conf"
+      # - "./keyfile:/etc/mongod/keyfile"  # Mount the key file
+    networks:
+      - network1
+
+networks:
+  network1:
+    name: docker_network
+    external: true

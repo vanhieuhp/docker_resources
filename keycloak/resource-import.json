@@ -1,0 +1,43 @@
+{
+    "allowRemoteResourceManagement": true,
+    "policyEnforcementMode": "ENFORCING",
+    "resources": [
+      {
+        "name": "Default Resource",
+        "type": "urn:fandelo_one:resources:default",
+        "ownerManagedAccess": false,
+        "attributes": {},
+        "_id": "28f6fc29-72ba-4982-9b0b-160d4bc7c8eb",
+        "uris": [
+          "/*"
+        ]
+      }
+    ],
+    "policies": [
+      {
+        "id": "2c5d5de3-920e-4565-ba7d-158bfb5192f1",
+        "name": "Default Policy",
+        "description": "A policy that grants access only for users within this realm",
+        "type": "js",
+        "logic": "POSITIVE",
+        "decisionStrategy": "AFFIRMATIVE",
+        "config": {
+          "code": "// by default, grants any permission associated with this policy\n$evaluation.grant();\n"
+        }
+      },
+      {
+        "id": "34b5d063-40d8-4420-a514-fd1cff12cdc8",
+        "name": "Default Permission",
+        "description": "A permission that applies to the default resource type",
+        "type": "resource",
+        "logic": "POSITIVE",
+        "decisionStrategy": "UNANIMOUS",
+        "config": {
+          "defaultResourceType": "urn:fandelo_one:resources:default",
+          "applyPolicies": "[\"Default Policy\"]"
+        }
+      }
+    ],
+    "scopes": [],
+    "decisionStrategy": "UNANIMOUS"
+  }
