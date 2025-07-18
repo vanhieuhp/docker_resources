@@ -1,0 +1,28 @@
+name: "sftp"
+
+services:
+  sftp:
+    image: atmoz/sftp:latest
+    container_name: sftp
+    ports:
+      - "2222:22"  # External port : container port
+    volumes:
+      - sftp_data:/home/admin/upload:rw  # SFTP upload directory
+    environment:
+      - SFTP_USERS=admin:password:1001  # user:Cde3$5tgb:uid
+    restart: unless-stopped
+    networks:
+      - network1
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+volumes:
+  sftp_data:
+
+networks:
+  network1:
+    external: true
+    name: docker_network

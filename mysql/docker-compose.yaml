@@ -1,35 +1,33 @@
 name: mysql
 
 services:
-  database:
-    image: mysql:8.0-bookworm
-    container_name: mysql
-    restart: always
-    env_file:
-      - .env
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_db
+    restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-password} # Fallback to 'rootpassword' if not set
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-springboot} # Fallback to 'mydatabase' if not set
-      MYSQL_USER: ${MYSQL_USER:-admin} # Fallback to 'myuser' if not set
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-password} # Fallback to 'mypassword' if not set
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: epayjsc
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: password
     ports:
       - "3306:3306"
     volumes:
-      - ./data:/var/lib/mysql
-      # - ./my.cnf:/etc/my.cnf
-      # - ./prerequisite.sh:/prerequisite.sh
-    healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "-uroot", "-p${password}"]
-      timeout: 10s
-      retries: 3
-      interval: 15s
-      start_period: 30s
-    mem_reservation: 128M
+      - ./init:/docker-entrypoint-initdb.d
+      - mysql_data:/var/lib/mysql
     networks:
       - network1
+    command: --default-authentication-plugin=caching_sha2_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  mysql_data:
 
 networks:
   network1:
     name: docker_network
     external: true
-
