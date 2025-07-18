@@ -12,7 +12,7 @@ services:
       - "27017:27017"
     volumes:
       # - "./rs-init.sh:/scripts/rs-init.sh"
-      - "./data:/data/db"
+      - "mongodb_data:/data/db"
       - "./mongod.conf:/etc/mongod.conf"
       # - "./keyfile:/etc/mongod/keyfile"  # Mount the key file
     networks:
@@ -22,3 +22,8 @@ networks:
   network1:
     name: docker_network
     external: true
+
+volumes:
+  mongodb_data:
+    driver: local
+    name: mongodb_data

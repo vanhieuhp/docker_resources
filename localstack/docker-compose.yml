@@ -1,0 +1,28 @@
+name: localstack
+
+services:
+  localstack:
+    container_name: localstack
+    restart: unless-stopped
+    image: localstack/localstack:4.5.0
+    ports:
+      - "127.0.0.1:4566:4566"            # LocalStack Gateway
+      - "127.0.0.1:4510-4559:4510-4559"  # external services port range
+    environment:
+      # LocalStack configuration: https://docs.localstack.cloud/references/configuration/
+      - DEBUG=${DEBUG:-0}
+    volumes:
+      - localstack_data:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      - docker_network
+
+networks:
+  docker_network:
+    name: docker_network
+    external: true
+
+volumes:
+  localstack_data:
+    name: localstack_data
+    driver: local
