@@ -1,0 +1,25 @@
+name: oracle
+
+services:
+  oracle-db:
+    image: gvenzl/oracle-xe:21.3.0-slim
+    container_name: oracle
+    ports:
+      - "1521:1521"     # Oracle SQL*Net listener
+      - "5500:5500"     # Oracle EM Express
+    environment:
+      ORACLE_PASSWORD: admin123  # Default password for SYS, SYSTEM, etc.
+      ORACLE_DATABASE: EPAYCORE # Optional: sets service name
+    volumes:
+      - oracle-data:/opt/oracle/oradata  # Persistent storage
+    restart: unless-stopped
+    networks:
+      - network1
+
+volumes:
+  oracle-data:
+
+networks:
+  network1:
+    external: true
+    name: docker_network
