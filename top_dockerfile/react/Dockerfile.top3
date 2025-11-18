@@ -1,0 +1,151 @@
+# Stage 1: Build frontend
+FROM node:20-alpine AS builder
+
+RUN corepack enable pnpm
+
+WORKDIR /app
+
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
+
+COPY tsconfig*.json vite.config.ts postcss.config.js tailwind.config.ts ./
+COPY index.html ./
+COPY src ./src
+COPY public ./public
+
+RUN pnpm build
+
+# Clean up dist (remove source maps, licenses, stats, robots.txt, etc.)
+RUN find /app/dist -type f -name '*.map' -delete \
+ && find /app/dist -type f -name '*.LICENSE.*' -delete \
+ && find /app/dist -type f -name '*.txt' -delete \
+ && find /app/dist -type f -name 'stats.html' -delete \
+ && find /app/dist -type f -name 'robots.txt' -delete \
+ && find /app/dist -type f -name '_redirects' -delete
+
+# Stage 2: Build Go server with FastHTTP
+FROM golang:1.21-alpine AS go-builder
+
+WORKDIR /app
+
+# Cài strip và upx
+RUN apk add --no-cache binutils upx
+
+# Copy dist files để embed
+COPY --from=builder /app/dist ./dist
+
+# Tạo go.mod và main.go với FastHTTP
+RUN cat > go.mod << 'GOMOD'
+module server
+
+go 1.21
+
+require github.com/valyala/fasthttp v1.51.0
+GOMOD
+
+RUN cat > main.go << 'GOSRC'
+package main
+
+import (
+    "embed"
+    "log"
+    "os"
+    "path"
+    "strings"
+
+    "github.com/valyala/fasthttp"
+)
+
+//go:embed dist
+var distFiles embed.FS
+
+func main() {
+    port := os.Getenv("PORT")
+    if port == "" {
+        port = "3000"
+    }
+
+    // FastHTTP handler
+    handler := func(ctx *fasthttp.RequestCtx) {
+        pathStr := string(ctx.Path())
+        
+        // Check if it's a static asset (has file extension)
+        if strings.Contains(path.Base(pathStr), ".") {
+            // Try to serve static file
+            file, err := distFiles.Open("dist" + pathStr)
+            if err == nil {
+                defer file.Close()
+                
+                // Set content type based on extension
+                ext := path.Ext(pathStr)
+                switch ext {
+                case ".js":
+                    ctx.SetContentType("application/javascript")
+                case ".css":
+                    ctx.SetContentType("text/css")
+                case ".svg":
+                    ctx.SetContentType("image/svg+xml")
+                case ".png":
+                    ctx.SetContentType("image/png")
+                case ".jpg", ".jpeg":
+                    ctx.SetContentType("image/jpeg")
+                case ".ico":
+                    ctx.SetContentType("image/x-icon")
+                default:
+                    ctx.SetContentType("application/octet-stream")
+                }
+                
+                // Copy file content to response
+                ctx.Response.SetBodyStream(file, -1)
+                return
+            }
+        }
+        
+        // SPA fallback - serve index.html for all routes
+        file, err := distFiles.Open("dist/index.html")
+        if err != nil {
+            ctx.SetStatusCode(404)
+            ctx.SetBodyString("Not Found")
+            return
+        }
+        defer file.Close()
+        
+        ctx.SetContentType("text/html; charset=utf-8")
+        ctx.Response.SetBodyStream(file, -1)
+    }
+
+    // healthcheck
+    if len(os.Args) > 1 && os.Args[1] == "-health" {
+        _, _, err := fasthttp.Get(nil, "http://127.0.0.1:"+port)
+        if err != nil {
+            os.Exit(1)
+        }
+        os.Exit(0)
+    }
+
+    log.Printf("FastHTTP server on :%s", port)
+    log.Fatal(fasthttp.ListenAndServe(":"+port, handler))
+}
+GOSRC
+
+# Download dependencies và build với tối ưu extreme
+RUN go mod tidy
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -trimpath -o server main.go
+RUN strip server
+RUN upx --ultra-brute --lzma server
+
+# Stage 3: Ultra-minimal runtime (scratch)
+FROM scratch
+
+# Copy binary (chứa cả static files)
+COPY --from=go-builder /app/server /server
+
+EXPOSE 3000
+
+# Thêm USER 1000
+USER 1000
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD ["/server", "-health"]
+
+CMD ["/server"]
