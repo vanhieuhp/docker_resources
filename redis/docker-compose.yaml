@@ -8,7 +8,7 @@ services:
       - "6379:6379"
     volumes:
       - redis:/data
-    restart: on-failure
+    restart: always
     networks:
       - network1
     healthcheck:
@@ -21,7 +21,7 @@ services:
   redisinsight:
     image: redislabs/redisinsight:2.56
     container_name: redis-insight
-    restart: on-failure
+    restart: always
     volumes:
       - redisinsight:/data
     ports:

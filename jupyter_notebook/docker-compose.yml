@@ -1,28 +1,29 @@
-version: '3'
 services:
-  notebooks:
-    image: jupyter/scipy-notebook:x86_64-ubuntu-22.04
-    container_name: notebooks
+  jupyter:
+    image: pytorch/pytorch:2.5.1-cuda12.4-cudnn9-runtime
+    container_name: jupyter-gpu
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    command: >
+      bash -c "pip install jupyterlab matplotlib pandas scikit-learn opencv-python &&
+               jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --ServerApp.token=${JUPYTER_TOKEN}"
+    volumes:
+      - ./work:/workspace/work
+    working_dir: /workspace
     ports:
       - "8888:8888"
-    volumes:
-      - notebooks:/home/jovyan/work
-    environment:
-      - JUPYTER_ENABLE_LAB=yes
-    command: start-notebook.sh --NotebookApp.token='' --NotebookApp.password=''
-    networks:
-      - network1
-
-volumes:
-  notebooks:
-    name: notebooks
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ${PWD}/data
-
-networks:
-  network1:
-    name: docker_network
-    external: true
+    expose:
+      - "8888"
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared-jupyter
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on:
+      - jupyter
