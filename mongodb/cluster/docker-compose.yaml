@@ -3,7 +3,7 @@ name: 'mongodb'
 services:
   mongo1:
     container_name: mongo1
-    image: bitnami/mongodb:7.0.14
+    image: soldevelo/mongodb:7.0.15
     hostname: mongo1
     volumes:
       - mongo1:/bitnami/mongodb
@@ -16,7 +16,7 @@ services:
     restart: on-failure
   mongo2:
     container_name: mongo2
-    image: bitnami/mongodb:7.0.14
+    image: soldevelo/mongodb:7.0.15
     hostname: mongo2
     volumes:
       - mongo2:/bitnami/mongodb
@@ -29,7 +29,7 @@ services:
     restart: on-failure
   mongo3:
     container_name: mongo3
-    image: bitnami/mongodb:7.0.14
+    image: soldevelo/mongodb:7.0.15
     hostname: mongo3
     volumes:
       - mongo3:/bitnami/mongodb
